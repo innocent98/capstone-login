@@ -1,3 +1,6 @@
+import 'package:capstone_login/profile.dart';
+import 'package:capstone_login/register.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'color.dart' as appColor;
 
@@ -9,6 +12,20 @@ class MyLogin extends StatefulWidget {
 }
 
 class _MyLoginState extends State<MyLogin> {
+  TextEditingController _email = new TextEditingController();
+  TextEditingController _password = new TextEditingController();
+  Future<void> signin(BuildContext context) async {
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _email.text,
+        password: _password.text,
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
   final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -72,6 +89,12 @@ class _MyLoginState extends State<MyLogin> {
                           child: Column(
                             children: [
                               TextFormField(
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "email required";
+                                  }
+                                  return null;
+                                },
                                 decoration: InputDecoration(
                                   labelText: "Email",
                                   hintText: "adevictor98@gmail.com",
@@ -93,15 +116,30 @@ class _MyLoginState extends State<MyLogin> {
                                       10,
                                     ),
                                   ),
+                                  errorBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 1,
+                                      color: Colors.red,
+                                    ),
+                                  ),
                                 ),
+                                controller: _email,
                               ),
                               SizedBox(
                                 height: 15,
                               ),
                               TextFormField(
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "password required";
+                                  } else if (value.trim().length < 6) {
+                                    return "password is a minimum of 6 characters";
+                                  }
+                                  return null;
+                                },
+                                obscureText: true,
                                 decoration: InputDecoration(
                                   labelText: "password",
-                                  hintText: "adr#^/08",
                                   suffixIcon: Icon(
                                     Icons.lock,
                                     color: appColor.button,
@@ -120,7 +158,15 @@ class _MyLoginState extends State<MyLogin> {
                                       10,
                                     ),
                                   ),
+                                  errorBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 1,
+                                      color: Colors.red,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
                                 ),
+                                controller: _password,
                               ),
                               SizedBox(
                                 height: 5,
@@ -144,7 +190,26 @@ class _MyLoginState extends State<MyLogin> {
                                   style: ElevatedButton.styleFrom(
                                     primary: appColor.button,
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    if (_formKey.currentState.validate()) {
+                                      {
+                                        signin(context);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content:
+                                                Text("validation going  on"),
+                                          ),
+                                        );
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => MyPortfolio(),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
                                   child: Text(
                                     "Login",
                                     style: TextStyle(
@@ -244,11 +309,21 @@ class _MyLoginState extends State<MyLogin> {
                             SizedBox(
                               width: 5,
                             ),
-                            Text(
-                              "Sign up",
-                              style: TextStyle(
-                                  color: appColor.button,
-                                  fontWeight: FontWeight.bold),
+                            GestureDetector(
+                              child: Text(
+                                "Sign up",
+                                style: TextStyle(
+                                    color: appColor.button,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MyRegister(),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         )
